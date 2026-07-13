@@ -114,7 +114,7 @@ async function createContract(req, res) {
     }
 
     const interest = principal * (parseFloat(interestRate || 0) / 100) * (parseInt(installmentPeriod) / 365);
-    const remainingBalance = Math.round((principal + interest) * 100) / 100;
+    const remainingBalance = Math.round((principal + (principal + interest)) * 100) / 100;
 
     // Helper to add days to a date string
     const addDays = (dateStr, days) => {

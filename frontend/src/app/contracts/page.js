@@ -493,7 +493,7 @@ export default function ContractsPage() {
                 
                 const principal = total - down;
                 const interest = principal * (rate / 100) * (period / 365);
-                const balance = principal + interest;
+                const balance = principal + (principal + interest);
                 const dailyPay = balance / period;
 
                 return (
@@ -529,9 +529,9 @@ export default function ContractsPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Daily Payment:</span>
+                      <span className="text-slate-500">{paymentType === 'daily' ? 'Daily Payment' : 'Monthly Payment'}:</span>
                       <span className="font-bold text-blue-500">
-                        ₭{dailyPay.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / day
+                        ₭{dailyPay.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / {paymentType === 'daily' ? 'day' : 'month'}
                       </span>
                     </div>
                   </div>
@@ -550,7 +550,7 @@ export default function ContractsPage() {
 
                 const principal = total - down;
                 const interest = principal * (rate / 100) * (period / 365);
-                const balance = principal + interest;
+                const balance = principal + (principal + interest);
                 
                 const baseInstallmentAmount = Math.floor((balance / period) * 100) / 100;
                 let sumGenerated = 0;
