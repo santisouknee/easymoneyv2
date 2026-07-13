@@ -40,11 +40,12 @@ async function rebuildSchedules(contractId) {
     for (const schedule of schedules) {
       if (paymentAmount <= 0) break;
 
-      const scheduleDue = parseFloat(schedule.amount_due);
-      const schedulePaid = parseFloat(schedule.amount_paid);
-      const needed = scheduleDue - schedulePaid;
+      const scheduleDue = Math.round(parseFloat(schedule.amount_due) * 100) / 100;
+      const schedulePaid = Math.round(parseFloat(schedule.amount_paid) * 100) / 100;
+      const needed = Math.round((scheduleDue - schedulePaid) * 100) / 100;
+      const paymentAmountRound = Math.round(paymentAmount * 100) / 100;
 
-      if (paymentAmount >= needed) {
+      if (paymentAmountRound >= needed) {
         await db.run(
           `UPDATE payment_schedules 
            SET amount_paid = ?, balance = 0.00, payment_status = 'paid' 
@@ -53,13 +54,14 @@ async function rebuildSchedules(contractId) {
         );
         paymentAmount -= needed;
       } else {
-        const newPaid = schedulePaid + paymentAmount;
-        const newBalance = scheduleDue - newPaid;
+        const newPaid = Math.round((schedulePaid + paymentAmount) * 100) / 100;
+        const newBalance = Math.round((scheduleDue - newPaid) * 100) / 100;
+        const status = newBalance <= 0 ? 'paid' : 'partial';
         await db.run(
           `UPDATE payment_schedules 
-           SET amount_paid = ?, balance = ?, payment_status = 'partial' 
+           SET amount_paid = ?, balance = ?, payment_status = ? 
            WHERE id = ?`,
-          [newPaid, newBalance, schedule.id]
+          [newPaid, newBalance, status, schedule.id]
         );
         paymentAmount = 0;
       }
