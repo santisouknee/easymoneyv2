@@ -52,7 +52,7 @@ export default function ContractsPage() {
   const [installmentPeriod, setInstallmentPeriod] = useState('12');
   const [startDate, setStartDate] = useState('');
   const [interestRate, setInterestRate] = useState('0');
-  const [paymentType, setPaymentType] = useState('daily_payment');
+  const [paymentType, setPaymentType] = useState('daily');
 
   const fetchContracts = async (searchVal = '', statusVal = '') => {
     setLoading(true);
@@ -96,7 +96,7 @@ export default function ContractsPage() {
     setProductService('');
     setContractDate(new Date().toISOString().split('T')[0]);
     setTotalAmount('');
-    setPaymentType('daily_payment');
+    setPaymentType('daily');
     setDownPaymentAmount('');
     setInstallmentPeriod('30');
     setStartDate(new Date().toISOString().split('T')[0]);
@@ -115,7 +115,7 @@ export default function ContractsPage() {
   const handlePeriodChange = (period) => {
     setInstallmentPeriod(period);
     const p = parseInt(period);
-    if (paymentType === 'daily_payment') {
+    if (paymentType === 'daily') {
       if (p === 30) setInterestRate('5');
       else if (p === 60) setInterestRate('10');
       else if (p >= 90) setInterestRate('15');
@@ -403,8 +403,8 @@ export default function ContractsPage() {
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
                     required
                   >
-                    <option value="daily_payment">Daily Payment</option>
-                    <option value="down_payment">Down Payment</option>
+                    <option value="daily">Daily</option>
+                    <option value="monthly">Monthly</option>
                   </select>
                 </div>
 
@@ -430,21 +430,21 @@ export default function ContractsPage() {
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
                     required
                   >
-                    {paymentType === 'daily_payment' ? (
+                    {paymentType === 'daily' ? (
                       <>
-                        <option value="30">30 Days (Interest: 5%)</option>
-                        <option value="60">60 Days (Interest: 10%)</option>
-                        <option value="90">90 Days (Interest: 15%)</option>
-                        <option value="100">100 Days (Interest: 15%)</option>
+                        <option value="30">30 Days (Interest: 5% )</option>
+                        <option value="60">60 Days (Interest: 10% )</option>
+                        <option value="90">90 Days (Interest: 15% )</option>
+                        <option value="100">100 Days (Interest: 15% )</option>
                       </>
                     ) : (
                       <>
-                        <option value="30">30 Days (Interest: 5%)</option>
-                        <option value="60">60 Days (Interest: 10%)</option>
-                        <option value="90">90 Days (Interest: 15%)</option>
-                        <option value="120">120 Days (Interest: 20%)</option>
-                        <option value="150">150 Days (Interest: 25%)</option>
-                        <option value="180">180 Days (Interest: 30%)</option>
+                        <option value="30">30 Days / 1 Month (Interest: 5% )</option>
+                        <option value="60">60 Days / 2 Months (Interest: 10% )</option>
+                        <option value="90">90 Days / 3 Months (Interest: 15% )</option>
+                        <option value="120">120 Days / 4 Months (Interest: 20% )</option>
+                        <option value="150">150 Days / 5 Months (Interest: 25% )</option>
+                        <option value="180">180 Days / 6 Months (Interest: 30% )</option>
                       </>
                     )}
                   </select>
