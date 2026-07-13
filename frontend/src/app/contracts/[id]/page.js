@@ -390,7 +390,7 @@ export default function ContractDetailPage() {
       {/* Record Payment Modal */}
       {showPayModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setShowPayModal(false)} />
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" />
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-md rounded-2xl shadow-2xl z-10 overflow-hidden transition-colors">
             
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
