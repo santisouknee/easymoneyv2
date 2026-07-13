@@ -1,0 +1,34 @@
+# Dependencies
+**/node_modules/
+**/.pnpm-store/
+
+# Local database fallback
+**/database.sqlite
+**/*.db
+**/*.sqlite
+
+# Configuration & Secrets
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Next.js build files
+**/.next/
+**/out/
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# System & IDE files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
