@@ -51,6 +51,7 @@ export default function PaymentsPage() {
   const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
   const [referenceNumber, setReferenceNumber] = useState('');
   const [remarks, setRemarks] = useState('');
+  const [selectedScheduleIds, setSelectedScheduleIds] = useState([]);
 
   const fetchPayments = async (searchVal = '') => {
     setLoading(true);
@@ -79,6 +80,7 @@ export default function PaymentsPage() {
     if (!customerId) {
       setContracts([]);
       setCustomerStatements([]);
+      setSelectedScheduleIds([]);
       return;
     }
     
@@ -106,6 +108,7 @@ export default function PaymentsPage() {
           setContractId('');
           setAmountPaid('');
         }
+        setSelectedScheduleIds([]);
       }
     };
 
@@ -115,6 +118,7 @@ export default function PaymentsPage() {
   const handleContractChange = (e) => {
     const cid = e.target.value;
     setContractId(cid);
+    setSelectedScheduleIds([]);
     
     // Auto populate outstanding due on selected contract
     const selectedConDetails = customerStatements.find(st => st.contract.id === parseInt(cid));
@@ -142,8 +146,26 @@ export default function PaymentsPage() {
     setPaymentMethod('bank_transfer');
     setReferenceNumber('');
     setRemarks('');
+    setSelectedScheduleIds([]);
     setError('');
     setShowModal(true);
+  };
+
+  const handleToggleSchedule = (id) => {
+    let updated;
+    if (selectedScheduleIds.includes(id)) {
+      updated = selectedScheduleIds.filter(x => x !== id);
+    } else {
+      updated = [...selectedScheduleIds, id];
+    }
+    setSelectedScheduleIds(updated);
+
+    const selectedConDetails = customerStatements.find(st => st.contract.id === parseInt(contractId));
+    const sum = (selectedConDetails?.schedules || [])
+      .filter(s => updated.includes(s.id))
+      .reduce((acc, s) => acc + (parseFloat(s.amount_due) - parseFloat(s.amount_paid)), 0);
+
+    setAmountPaid(formatInputNumber(sum.toString()));
   };
 
   const handleVoid = async (id) => {
@@ -423,6 +445,47 @@ export default function PaymentsPage() {
                   />
                 </div>
               </div>
+
+              {/* Checkbox Days Selector */}
+              {(() => {
+                const cid = parseInt(contractId);
+                if (!cid || customerStatements.length === 0) return null;
+                const selectedConDetails = customerStatements.find(st => st.contract.id === cid);
+                if (!selectedConDetails || !selectedConDetails.schedules || selectedConDetails.schedules.every(s => s.payment_status === 'paid')) return null;
+
+                return (
+                  <div className="space-y-2">
+                    <span className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Select Days to Pay (Optional Checkbox Mode)
+                    </span>
+                    <div className="max-h-28 overflow-y-auto space-y-1.5 p-2 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
+                      {selectedConDetails.schedules
+                        .filter(s => s.payment_status !== 'paid')
+                        .map((sch) => {
+                          const isChecked = selectedScheduleIds.includes(sch.id);
+                          const outstanding = parseFloat(sch.amount_due) - parseFloat(sch.amount_paid);
+                          return (
+                            <label key={sch.id} className="flex items-center justify-between p-1.5 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 rounded cursor-pointer">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => handleToggleSchedule(sch.id)}
+                                  className="w-3.5 h-3.5 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 cursor-pointer"
+                                />
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">Day #{sch.installment_number}</span>
+                                <span className="text-[10px] text-slate-500">({sch.due_date})</span>
+                              </div>
+                              <span className="font-mono text-slate-700 dark:text-slate-350">
+                                ₭{outstanding.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                            </label>
+                          );
+                        })}
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
