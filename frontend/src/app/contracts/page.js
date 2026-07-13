@@ -493,7 +493,7 @@ export default function ContractsPage() {
                 
                 const principal = total - down;
                 const interest = principal * (rate / 100) * (period / 365);
-                const balance = principal + (principal + interest);
+                const balance = principal + interest;
                 const dailyPay = balance / period;
 
                 return (
@@ -550,7 +550,7 @@ export default function ContractsPage() {
 
                 const principal = total - down;
                 const interest = principal * (rate / 100) * (period / 365);
-                const balance = principal + (principal + interest);
+                const balance = principal + interest;
                 
                 const baseInstallmentAmount = Math.floor((balance / period) * 100) / 100;
                 let sumGenerated = 0;
