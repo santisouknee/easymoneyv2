@@ -378,8 +378,8 @@ export default function ContractsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+                <div className="sm:col-span-3">
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
                     Total Amount *
                   </label>
@@ -393,7 +393,7 @@ export default function ContractsPage() {
                   />
                 </div>
 
-                <div>
+                <div className="sm:col-span-3">
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
                     Payment Type *
                   </label>
@@ -408,7 +408,7 @@ export default function ContractsPage() {
                   </select>
                 </div>
 
-                <div>
+                <div className="sm:col-span-2">
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase font-bold text-blue-500">
                     Interest Rate (%)
                   </label>
@@ -420,7 +420,7 @@ export default function ContractsPage() {
                   />
                 </div>
 
-                <div>
+                <div className="sm:col-span-4">
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
                     Installments (Days) *
                   </label>
