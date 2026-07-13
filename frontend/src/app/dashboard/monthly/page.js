@@ -89,7 +89,7 @@ export default function MonthlyDashboard() {
             <CalendarRange className="w-4 h-4 text-indigo-500" />
           </div>
           <p className="text-xl font-bold text-slate-800 dark:text-white">
-            ฿{parseFloat(kpis.monthlyDueAmount || 0).toLocaleString()}
+            ₭{parseFloat(kpis.monthlyDueAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
           <span className="text-[10px] text-slate-400 mt-1 block">Due this month</span>
         </div>
@@ -100,7 +100,7 @@ export default function MonthlyDashboard() {
             <CheckSquare className="w-4 h-4 text-emerald-500" />
           </div>
           <p className="text-xl font-bold text-slate-800 dark:text-white">
-            ฿{parseFloat(kpis.monthlyCollectedAmount || 0).toLocaleString()}
+            ₭{parseFloat(kpis.monthlyCollectedAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
           <span className="text-[10px] text-slate-400 mt-1 block">Received this month</span>
         </div>
@@ -111,7 +111,7 @@ export default function MonthlyDashboard() {
             <Coins className="w-4 h-4 text-amber-500" />
           </div>
           <p className="text-xl font-bold text-slate-800 dark:text-white">
-            ฿{parseFloat(kpis.outstandingAmount || 0).toLocaleString()}
+            ₭{parseFloat(kpis.outstandingAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
           <span className="text-[10px] text-slate-400 mt-1 block">Overall balance</span>
         </div>
@@ -122,7 +122,7 @@ export default function MonthlyDashboard() {
             <AlertCircle className="w-4 h-4 text-rose-500" />
           </div>
           <p className="text-xl font-bold text-slate-800 dark:text-white">
-            ฿{parseFloat(kpis.overdueAmount || 0).toLocaleString()}
+            ₭{parseFloat(kpis.overdueAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
           <span className="text-[10px] text-slate-400 mt-1 block">Pending overdue</span>
         </div>
@@ -185,7 +185,7 @@ export default function MonthlyDashboard() {
                       <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{cust.customer_name}</span>
                     </div>
                     <span className="text-sm font-bold text-amber-500">
-                      ฿{parseFloat(cust.outstanding).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      ₭{parseFloat(cust.outstanding).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                 ))

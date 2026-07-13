@@ -39,12 +39,12 @@ export default function RemindersPage() {
   const triggerSimulation = (type, item) => {
     let msg = '';
     const dateText = item.due_date;
-    const balanceDue = parseFloat(item.amount_due - item.amount_paid).toLocaleString();
+    const balanceDue = parseFloat(item.amount_due - item.amount_paid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     
     if (type === 'WhatsApp') {
-      msg = `💬 WhatsApp simulator: Reminder sent to ${item.customer_name} (${item.phone_number}). Text: "Dear Customer, your payment of ฿${balanceDue} for Contract ${item.contract_number} is due on ${dateText}. Please make payment. Thank you."`;
+      msg = `💬 WhatsApp simulator: Reminder sent to ${item.customer_name} (${item.phone_number}). Text: "Dear Customer, your payment of ₭${balanceDue} for Contract ${item.contract_number} is due on ${dateText}. Please make payment. Thank you."`;
     } else if (type === 'SMS') {
-      msg = `📲 SMS simulator: Text alert sent to ${item.phone_number}. Text: "Easy Money: Reminder: ฿${balanceDue} due on ${dateText} for ${item.contract_number}."`;
+      msg = `📲 SMS simulator: Text alert sent to ${item.phone_number}. Text: "Easy Money: Reminder: ₭${balanceDue} due on ${dateText} for ${item.contract_number}."`;
     } else if (type === 'Email') {
       msg = `📧 Email simulator: Invoice reminder sent to ${item.email || 'customer@example.com'} successfully!`;
     }
@@ -142,7 +142,7 @@ export default function RemindersPage() {
                         </div>
                         <div className="text-right space-y-3">
                           <div>
-                            <p className="text-sm font-bold text-slate-800 dark:text-white">฿{balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                            <p className="text-sm font-bold text-slate-800 dark:text-white">₭{balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                             <span className="text-[10px] text-slate-500">Remaining</span>
                           </div>
                           

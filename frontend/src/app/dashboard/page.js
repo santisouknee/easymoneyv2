@@ -67,7 +67,7 @@ export default function DailyDashboard() {
             </div>
           </div>
           <p className="text-2xl font-bold text-slate-800 dark:text-white">
-            ฿{parseFloat(collectionSummary.totalDueToday || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            ₭{parseFloat(collectionSummary.totalDueToday || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Expected installments due date today</p>
         </div>
@@ -80,7 +80,7 @@ export default function DailyDashboard() {
             </div>
           </div>
           <p className="text-2xl font-bold text-slate-800 dark:text-white">
-            ฿{parseFloat(collectionSummary.totalCollectedToday || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            ₭{parseFloat(collectionSummary.totalCollectedToday || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Total collections recorded today</p>
         </div>
@@ -93,7 +93,7 @@ export default function DailyDashboard() {
             </div>
           </div>
           <p className="text-2xl font-bold text-slate-800 dark:text-white">
-            ฿{parseFloat(collectionSummary.remainingAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            ₭{parseFloat(collectionSummary.remainingAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Outstanding amount remaining today</p>
         </div>
@@ -150,7 +150,7 @@ export default function DailyDashboard() {
                       <td className="py-3.5 pr-4 font-semibold text-slate-800 dark:text-slate-100">{item.customer_name}</td>
                       <td className="py-3.5 px-4 font-mono text-xs">{item.contract_number}</td>
                       <td className="py-3.5 px-4 text-right font-semibold">
-                        ฿{parseFloat(item.amount_due).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        ₭{parseFloat(item.amount_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td className="py-3.5 pl-4">
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
@@ -207,7 +207,7 @@ export default function DailyDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-rose-500">
-                      ฿{parseFloat(item.amount_due - item.amount_paid).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      ₭{parseFloat(item.amount_due - item.amount_paid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                     <p className="text-[10px] text-slate-400 mt-1">Outstanding</p>
                     

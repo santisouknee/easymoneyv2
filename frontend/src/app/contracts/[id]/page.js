@@ -19,6 +19,19 @@ import {
   FileCheck
 } from 'lucide-react';
 
+const formatInputNumber = (val) => {
+  if (!val) return '';
+  // Remove all characters except digits and decimal point
+  let clean = val.replace(/[^0-9.]/g, '');
+  const parts = clean.split('.');
+  let integerPart = parts[0];
+  const decimalPart = parts.length > 1 ? '.' + parts[1] : '';
+  if (integerPart) {
+    integerPart = parseInt(integerPart, 10).toLocaleString('en-US');
+  }
+  return integerPart + decimalPart;
+};
+
 export default function ContractDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -72,7 +85,7 @@ export default function ContractDetailPage() {
       typicalDue = parseFloat(unpaid.amount_due) - parseFloat(unpaid.amount_paid);
     }
 
-    setAmountPaid(typicalDue.toString());
+    setAmountPaid(formatInputNumber(typicalDue.toString()));
     setReferenceNumber('');
     setRemarks('');
     setPayError('');
@@ -104,7 +117,7 @@ export default function ContractDetailPage() {
       customerId: details.contract.customer_id,
       contractId: parseInt(contractId),
       paymentDate,
-      amountPaid: parseFloat(amountPaid),
+      amountPaid: parseFloat(String(amountPaid || 0).replace(/,/g, '')),
       paymentMethod,
       referenceNumber,
       remarks
@@ -204,15 +217,15 @@ export default function ContractDetailPage() {
           <div className="grid grid-cols-2 gap-4 text-xs pt-2 border-t border-slate-100 dark:border-slate-800/80">
             <div>
               <span className="text-slate-500 block">Total Amount</span>
-              <span className="font-bold text-slate-800 dark:text-white">฿{parseFloat(contract.total_amount).toLocaleString()}</span>
+              <span className="font-bold text-slate-800 dark:text-white">₭{parseFloat(contract.total_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
             <div>
               <span className="text-slate-500 block">Down Payment</span>
-              <span className="font-bold text-slate-800 dark:text-white">฿{parseFloat(contract.down_payment_amount).toLocaleString()}</span>
+              <span className="font-bold text-slate-800 dark:text-white">₭{parseFloat(contract.down_payment_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
             <div>
-              <span className="text-slate-500 block">Term (Months)</span>
-              <span className="font-semibold">{contract.installment_period} Months</span>
+              <span className="text-slate-500 block">Term (Days)</span>
+              <span className="font-semibold">{contract.installment_period} Days</span>
             </div>
             <div>
               <span className="text-slate-500 block">Start Date</span>
@@ -239,9 +252,9 @@ export default function ContractDetailPage() {
 
           <div className="my-4">
             <p className="text-3xl font-black text-slate-800 dark:text-white">
-              ฿{parseFloat(contract.remaining_balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              ₭{parseFloat(contract.remaining_balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-slate-500 mt-1">Remaining out of ฿{parseFloat(contract.total_amount - contract.down_payment_amount).toLocaleString()} balance</p>
+            <p className="text-xs text-slate-500 mt-1">Remaining out of ₭{parseFloat(contract.total_amount - contract.down_payment_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} balance</p>
           </div>
 
           <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
@@ -279,9 +292,9 @@ export default function ContractDetailPage() {
                   <tr key={sch.id} className="hover:bg-slate-50/20 dark:hover:bg-slate-800/10 text-slate-700 dark:text-slate-300">
                     <td className="py-3.5 pr-4 font-mono text-xs">{sch.installment_number}</td>
                     <td className="py-3.5 px-4 font-mono text-xs">{sch.due_date}</td>
-                    <td className="py-3.5 px-4 text-right font-semibold">฿{parseFloat(sch.amount_due).toLocaleString()}</td>
-                    <td className="py-3.5 px-4 text-right font-semibold text-emerald-500">฿{parseFloat(sch.amount_paid).toLocaleString()}</td>
-                    <td className="py-3.5 px-4 text-right font-semibold text-amber-500">฿{parseFloat(sch.balance).toLocaleString()}</td>
+                    <td className="py-3.5 px-4 text-right font-semibold">₭{parseFloat(sch.amount_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td className="py-3.5 px-4 text-right font-semibold text-emerald-500">₭{parseFloat(sch.amount_paid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td className="py-3.5 px-4 text-right font-semibold text-amber-500">₭{parseFloat(sch.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td className="py-3.5 pl-4">
                       <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
                         sch.payment_status === 'paid' 
@@ -332,7 +345,7 @@ export default function ContractDetailPage() {
                   </div>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-slate-500">Amount Paid</span>
-                    <span className="font-bold text-emerald-500">฿{parseFloat(pay.amount_paid).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span className="font-bold text-emerald-500">₭{parseFloat(pay.amount_paid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-slate-500">Method</span>
@@ -411,13 +424,13 @@ export default function ContractDetailPage() {
                 
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
-                    Amount Collected (฿) *
+                    Amount Collected (₭) *
                   </label>
                   <input
-                    type="number"
-                    step="0.01"
+                    type="text"
                     value={amountPaid}
-                    onChange={(e) => setAmountPaid(e.target.value)}
+                    onChange={(e) => setAmountPaid(formatInputNumber(e.target.value))}
+                    placeholder="10,000"
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
                     required
                   />
@@ -468,6 +481,73 @@ export default function ContractDetailPage() {
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none resize-none"
                 />
               </div>
+
+              {/* Payment Allocation Preview */}
+              {(() => {
+                const amt = parseFloat(String(amountPaid || 0).replace(/,/g, ''));
+                if (amt <= 0 || !schedules) return null;
+
+                let remaining = amt;
+                const previewList = [];
+                const unpaid = schedules
+                  .filter(s => s.payment_status !== 'paid')
+                  .map(s => ({ ...s }));
+
+                for (const schedule of unpaid) {
+                  if (remaining <= 0) break;
+                  const due = parseFloat(schedule.amount_due);
+                  const paid = parseFloat(schedule.amount_paid);
+                  const needed = due - paid;
+
+                  let allocated = 0;
+                  let newStatus = 'pending';
+                  
+                  if (remaining >= needed) {
+                    allocated = needed;
+                    remaining -= needed;
+                    newStatus = 'paid';
+                  } else {
+                    allocated = remaining;
+                    remaining = 0;
+                    newStatus = 'partial';
+                  }
+
+                  previewList.push({
+                    installmentNumber: schedule.installment_number,
+                    dueDate: schedule.due_date,
+                    due,
+                    paid,
+                    allocated,
+                    newStatus
+                  });
+                }
+
+                if (previewList.length === 0) return null;
+
+                return (
+                  <div className="space-y-2 border-t border-slate-200 dark:border-slate-800 pt-3">
+                    <span className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Live Collection Distribution Preview
+                    </span>
+                    <div className="max-h-32 overflow-y-auto space-y-1.5 p-3.5 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
+                      {previewList.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/40 last:border-0 pb-1.5 last:pb-0 text-slate-600 dark:text-slate-350">
+                          <div>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">Month #{item.installmentNumber}</span>
+                            <span className="text-[10px] text-slate-500 block">Due: {item.dueDate}</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-bold text-emerald-500">+₭{item.allocated.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className={`text-[9px] ml-2 px-1.5 py-0.5 rounded font-bold uppercase ${
+                              item.newStatus === 'paid' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                            }`}>{item.newStatus}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-800 pt-4 mt-6">
                 <button

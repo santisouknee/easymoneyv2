@@ -16,6 +16,19 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+const formatInputNumber = (val) => {
+  if (!val) return '';
+  // Remove all characters except digits and decimal point
+  let clean = val.replace(/[^0-9.]/g, '');
+  const parts = clean.split('.');
+  let integerPart = parts[0];
+  const decimalPart = parts.length > 1 ? '.' + parts[1] : '';
+  if (integerPart) {
+    integerPart = parseInt(integerPart, 10).toLocaleString('en-US');
+  }
+  return integerPart + decimalPart;
+};
+
 export default function ContractsPage() {
   const [contracts, setContracts] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -38,6 +51,7 @@ export default function ContractsPage() {
   const [downPaymentAmount, setDownPaymentAmount] = useState('');
   const [installmentPeriod, setInstallmentPeriod] = useState('12');
   const [startDate, setStartDate] = useState('');
+  const [interestRate, setInterestRate] = useState('0');
 
   const fetchContracts = async (searchVal = '', statusVal = '') => {
     setLoading(true);
@@ -84,6 +98,7 @@ export default function ContractsPage() {
     setDownPaymentAmount('');
     setInstallmentPeriod('12');
     setStartDate(new Date().toISOString().split('T')[0]);
+    setInterestRate('0');
     setError('');
     setShowModal(true);
   };
@@ -113,10 +128,11 @@ export default function ContractsPage() {
       customerId: parseInt(customerId),
       productService,
       contractDate,
-      totalAmount: parseFloat(totalAmount),
-      downPaymentAmount: parseFloat(downPaymentAmount),
+      totalAmount: parseFloat(String(totalAmount || 0).replace(/,/g, '')),
+      downPaymentAmount: parseFloat(String(downPaymentAmount || 0).replace(/,/g, '')),
       installmentPeriod: parseInt(installmentPeriod),
-      startDate
+      startDate,
+      interestRate: parseFloat(interestRate || 0)
     });
 
     setSubmitting(false);
@@ -213,14 +229,14 @@ export default function ContractsPage() {
                     </td>
                     <td className="py-4 px-6 text-xs max-w-xs truncate">{con.product_service}</td>
                     <td className="py-4 px-6 text-right font-semibold text-slate-800 dark:text-slate-100">
-                      ฿{parseFloat(con.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      ₭{parseFloat(con.total_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-4 px-6 text-right font-semibold text-slate-800 dark:text-slate-100">
                       <span className={parseFloat(con.remaining_balance) > 0 ? 'text-amber-500' : 'text-emerald-500'}>
-                        ฿{parseFloat(con.remaining_balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        ₭{parseFloat(con.remaining_balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-xs">{con.installment_period} Months</td>
+                    <td className="py-4 px-6 text-xs">{con.installment_period} Days</td>
                     <td className="py-4 px-6">
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
                         con.status === 'completed' 
@@ -336,17 +352,16 @@ export default function ContractsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
                     Total Amount *
                   </label>
                   <input
-                    type="number"
-                    step="0.01"
+                    type="text"
                     value={totalAmount}
-                    onChange={(e) => setTotalAmount(e.target.value)}
-                    placeholder="12000"
+                    onChange={(e) => setTotalAmount(formatInputNumber(e.target.value))}
+                    placeholder="120,000"
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
                     required
                   />
@@ -357,11 +372,10 @@ export default function ContractsPage() {
                     Down Payment *
                   </label>
                   <input
-                    type="number"
-                    step="0.01"
+                    type="text"
                     value={downPaymentAmount}
-                    onChange={(e) => setDownPaymentAmount(e.target.value)}
-                    placeholder="2000"
+                    onChange={(e) => setDownPaymentAmount(formatInputNumber(e.target.value))}
+                    placeholder="2,000"
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
                     required
                   />
@@ -369,13 +383,28 @@ export default function ContractsPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
-                    Installments (Months) *
+                    Interest Rate (%) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={interestRate}
+                    onChange={(e) => setInterestRate(e.target.value)}
+                    placeholder="0"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
+                    Installments (Days) *
                   </label>
                   <input
                     type="number"
                     value={installmentPeriod}
                     onChange={(e) => setInstallmentPeriod(e.target.value)}
-                    placeholder="10"
+                    placeholder="12"
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
                     required
                   />
@@ -412,22 +441,131 @@ export default function ContractsPage() {
                 </div>
               </div>
 
-              {totalAmount && downPaymentAmount && (
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Remaining Balance:</span>
-                    <span className="font-bold text-slate-800 dark:text-white">
-                      ฿{(parseFloat(totalAmount) - parseFloat(downPaymentAmount)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </span>
+              {(() => {
+                const total = parseFloat(String(totalAmount || 0).replace(/,/g, ''));
+                const down = parseFloat(String(downPaymentAmount || 0).replace(/,/g, ''));
+                const rate = parseFloat(interestRate || 0);
+                const period = parseInt(installmentPeriod || 1);
+                
+                if (!totalAmount && !downPaymentAmount) return null;
+                
+                const principal = total - down;
+                const interest = principal * (rate / 100) * (period / 365);
+                const balance = principal + interest;
+                const dailyPay = balance / period;
+
+                return (
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Sales Price:</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-300">
+                        ₭{total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Down Payment:</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-300">
+                        ₭{down.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Principal Loan:</span>
+                      <span className="font-bold text-slate-800 dark:text-white">
+                        ₭{principal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Interest ({interestRate}% Flat Rate):</span>
+                      <span className="font-bold text-rose-500">
+                        ₭{interest.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2 font-semibold text-sm">
+                      <span className="text-slate-700 dark:text-slate-200">Total Balance (Installments):</span>
+                      <span className="font-bold text-slate-800 dark:text-white">
+                        ₭{balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Daily Payment:</span>
+                      <span className="font-bold text-blue-500">
+                        ₭{dailyPay.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / day
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Approx. Monthly Payment:</span>
-                    <span className="font-bold text-blue-500">
-                      ฿{((parseFloat(totalAmount) - parseFloat(downPaymentAmount)) / parseInt(installmentPeriod || 1)).toLocaleString(undefined, { minimumFractionDigits: 2 })} / month
+                );
+              })()}
+
+              {/* Installment preview list */}
+              {(() => {
+                const period = parseInt(installmentPeriod) || 0;
+                const total = parseFloat(String(totalAmount || 0).replace(/,/g, '')) || 0;
+                const down = parseFloat(String(downPaymentAmount || 0).replace(/,/g, '')) || 0;
+                const rate = parseFloat(interestRate) || 0;
+                const start = startDate;
+
+                if (period <= 0 || total <= 0 || !start) return null;
+
+                const principal = total - down;
+                const interest = principal * (rate / 100) * (period / 365);
+                const balance = principal + interest;
+                
+                const baseInstallmentAmount = Math.floor((balance / period) * 100) / 100;
+                let sumGenerated = 0;
+                const previews = [];
+
+                const addDays = (dateStr, days) => {
+                  const d = new Date(dateStr);
+                  d.setDate(d.getDate() + days);
+                  return d.toISOString().split('T')[0];
+                };
+
+                for (let i = 1; i <= period; i++) {
+                  let amountDue = baseInstallmentAmount;
+                  if (i === period) {
+                    amountDue = Math.round((balance - sumGenerated) * 100) / 100;
+                  } else {
+                    sumGenerated += baseInstallmentAmount;
+                  }
+                  const dueDate = addDays(start, i);
+                  previews.push({
+                    installmentNumber: i,
+                    dueDate,
+                    amountDue
+                  });
+                }
+
+                return (
+                  <div className="space-y-2">
+                    <span className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Live Customer Installment Preview
+
                     </span>
+                    <div className="max-h-36 overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-xl p-3 bg-slate-50/50 dark:bg-slate-900/40 text-xs">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800 pb-1.5">
+                            <th className="pb-1 pr-2">Month</th>
+                            <th className="pb-1 px-2">Due Date</th>
+                            <th className="pb-1 text-right">Payment Due</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {previews.map((item, index) => (
+                            <tr key={index} className="border-b border-slate-100 dark:border-slate-800/40 last:border-0 text-slate-600 dark:text-slate-300">
+                              <td className="py-1.5 pr-2 font-mono">#{item.installmentNumber}</td>
+                              <td className="py-1.5 px-2 font-mono">{item.dueDate}</td>
+                              <td className="py-1.5 text-right font-semibold text-slate-800 dark:text-slate-200">
+                                ₭{item.amountDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               <div className="flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-800 pt-4 mt-6">
                 <button

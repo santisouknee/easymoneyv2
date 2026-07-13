@@ -15,10 +15,24 @@ import {
   CreditCard
 } from 'lucide-react';
 
+const formatInputNumber = (val) => {
+  if (!val) return '';
+  // Remove all characters except digits and decimal point
+  let clean = val.replace(/[^0-9.]/g, '');
+  const parts = clean.split('.');
+  let integerPart = parts[0];
+  const decimalPart = parts.length > 1 ? '.' + parts[1] : '';
+  if (integerPart) {
+    integerPart = parseInt(integerPart, 10).toLocaleString('en-US');
+  }
+  return integerPart + decimalPart;
+};
+
 export default function PaymentsPage() {
   const [payments, setPayments] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [contracts, setContracts] = useState([]); // Contracts for the selected customer in modal
+  const [customerStatements, setCustomerStatements] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -64,26 +78,29 @@ export default function PaymentsPage() {
   useEffect(() => {
     if (!customerId) {
       setContracts([]);
+      setCustomerStatements([]);
       return;
     }
     
     const fetchCustomerContracts = async () => {
       const res = await api.get(`/reports/statement/${customerId}`);
       if (!res.error && res.statements) {
+        setCustomerStatements(res.statements);
         // filter active contracts
         const activeCons = res.statements
           .map(st => st.contract)
           .filter(c => c.status === 'active' || c.status === 'overdue');
         setContracts(activeCons);
         if (activeCons.length > 0) {
-          setContractId(activeCons[0].id.toString());
-          // Auto populate outstanding due on the first active contract
-          const firstConDetails = res.statements[0];
-          const unpaid = firstConDetails.schedules?.find(s => s.payment_status !== 'paid');
+          const firstCon = activeCons[0];
+          setContractId(firstCon.id.toString());
+          // Find statement for this first contract
+          const firstConDetails = res.statements.find(st => st.contract.id === firstCon.id);
+          const unpaid = firstConDetails?.schedules?.find(s => s.payment_status !== 'paid');
           if (unpaid) {
-            setAmountPaid((parseFloat(unpaid.amount_due) - parseFloat(unpaid.amount_paid)).toString());
+            setAmountPaid(formatInputNumber((parseFloat(unpaid.amount_due) - parseFloat(unpaid.amount_paid)).toString()));
           } else {
-            setAmountPaid(firstConDetails.contract.remaining_balance.toString());
+            setAmountPaid(formatInputNumber(firstCon.remaining_balance.toString()));
           }
         } else {
           setContractId('');
@@ -94,6 +111,22 @@ export default function PaymentsPage() {
 
     fetchCustomerContracts();
   }, [customerId]);
+
+  const handleContractChange = (e) => {
+    const cid = e.target.value;
+    setContractId(cid);
+    
+    // Auto populate outstanding due on selected contract
+    const selectedConDetails = customerStatements.find(st => st.contract.id === parseInt(cid));
+    if (selectedConDetails) {
+      const unpaid = selectedConDetails.schedules?.find(s => s.payment_status !== 'paid');
+      if (unpaid) {
+        setAmountPaid(formatInputNumber((parseFloat(unpaid.amount_due) - parseFloat(unpaid.amount_paid)).toString()));
+      } else {
+        setAmountPaid(formatInputNumber(selectedConDetails.contract.remaining_balance.toString()));
+      }
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -138,7 +171,7 @@ export default function PaymentsPage() {
       customerId: parseInt(customerId),
       contractId: parseInt(contractId),
       paymentDate,
-      amountPaid: parseFloat(amountPaid),
+      amountPaid: parseFloat(String(amountPaid || 0).replace(/,/g, '')),
       paymentMethod,
       referenceNumber,
       remarks
@@ -223,7 +256,7 @@ export default function PaymentsPage() {
                     <td className="py-4 px-6 font-mono text-xs">{pay.contract_number}</td>
                     <td className="py-4 px-6 text-xs">{pay.payment_date}</td>
                     <td className="py-4 px-6 text-right font-bold text-emerald-500">
-                      ฿{parseFloat(pay.amount_paid).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      ₭{parseFloat(pay.amount_paid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-4 px-6">
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase bg-slate-100 dark:bg-slate-800">
@@ -315,7 +348,7 @@ export default function PaymentsPage() {
                   </label>
                   <select
                     value={contractId}
-                    onChange={(e) => setContractId(e.target.value)}
+                    onChange={handleContractChange}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
                     required
                     disabled={contracts.length === 0}
@@ -323,7 +356,7 @@ export default function PaymentsPage() {
                     <option value="" disabled>-- Choose Contract --</option>
                     {contracts.map(con => (
                       <option key={con.id} value={con.id}>
-                        {con.contract_number} (Bal: ฿{parseFloat(con.remaining_balance).toLocaleString()})
+                        {con.contract_number} (Bal: ₭{parseFloat(con.remaining_balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
                       </option>
                     ))}
                   </select>
@@ -346,13 +379,13 @@ export default function PaymentsPage() {
                 
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
-                    Amount Collected (฿) *
+                    Amount Collected (₭) *
                   </label>
                   <input
-                    type="number"
-                    step="0.01"
+                    type="text"
                     value={amountPaid}
-                    onChange={(e) => setAmountPaid(e.target.value)}
+                    onChange={(e) => setAmountPaid(formatInputNumber(e.target.value))}
+                    placeholder="10,000"
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
                     required
                   />
@@ -403,6 +436,77 @@ export default function PaymentsPage() {
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none resize-none"
                 />
               </div>
+
+              {/* Payment Allocation Preview */}
+              {(() => {
+                const amt = parseFloat(String(amountPaid || 0).replace(/,/g, ''));
+                const cid = parseInt(contractId);
+                if (amt <= 0 || !cid || customerStatements.length === 0) return null;
+
+                const selectedConDetails = customerStatements.find(st => st.contract.id === cid);
+                if (!selectedConDetails || !selectedConDetails.schedules) return null;
+
+                let remaining = amt;
+                const previewList = [];
+                const unpaid = selectedConDetails.schedules
+                  .filter(s => s.payment_status !== 'paid')
+                  .map(s => ({ ...s }));
+
+                for (const schedule of unpaid) {
+                  if (remaining <= 0) break;
+                  const due = parseFloat(schedule.amount_due);
+                  const paid = parseFloat(schedule.amount_paid);
+                  const needed = due - paid;
+
+                  let allocated = 0;
+                  let newStatus = 'pending';
+                  
+                  if (remaining >= needed) {
+                    allocated = needed;
+                    remaining -= needed;
+                    newStatus = 'paid';
+                  } else {
+                    allocated = remaining;
+                    remaining = 0;
+                    newStatus = 'partial';
+                  }
+
+                  previewList.push({
+                    installmentNumber: schedule.installment_number,
+                    dueDate: schedule.due_date,
+                    due,
+                    paid,
+                    allocated,
+                    newStatus
+                  });
+                }
+
+                if (previewList.length === 0) return null;
+
+                return (
+                  <div className="space-y-2 border-t border-slate-200 dark:border-slate-800 pt-3">
+                    <span className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Live Collection Distribution Preview
+                    </span>
+                    <div className="max-h-32 overflow-y-auto space-y-1.5 p-3.5 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
+                      {previewList.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/40 last:border-0 pb-1.5 last:pb-0 text-slate-600 dark:text-slate-350">
+                          <div>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">Month #{item.installmentNumber}</span>
+                            <span className="text-[10px] text-slate-500 block">Due: {item.dueDate}</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-bold text-emerald-500">+₭{item.allocated.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className={`text-[9px] ml-2 px-1.5 py-0.5 rounded font-bold uppercase ${
+                              item.newStatus === 'paid' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                            }`}>{item.newStatus}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-800 pt-4 mt-6">
                 <button

@@ -47,7 +47,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 p-8 rounded-2xl shadow-2xl z-10">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 shadow-lg shadow-blue-500/25 mb-4 text-white text-2xl font-bold">
-            ฿
+            ₭
           </div>
           <h2 className="text-2xl font-bold text-white tracking-tight">Welcome to Easy Money</h2>
           <p className="text-sm text-slate-400 mt-2">SME Customer Down Payment Monitor</p>

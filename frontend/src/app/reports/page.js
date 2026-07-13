@@ -255,15 +255,15 @@ export default function ReportsPage() {
                       </div>
                       <div>
                         <span className="text-slate-500 block">Total Contract Value</span>
-                        <span className="font-semibold text-slate-800 dark:text-white">฿{parseFloat(st.contract.total_amount).toLocaleString()}</span>
+                        <span className="font-semibold text-slate-800 dark:text-white">₭{parseFloat(st.contract.total_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div>
                         <span className="text-slate-500 block">Down Payment</span>
-                        <span className="font-semibold text-slate-800 dark:text-white">฿{parseFloat(st.contract.down_payment_amount).toLocaleString()}</span>
+                        <span className="font-semibold text-slate-800 dark:text-white">₭{parseFloat(st.contract.down_payment_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div>
                         <span className="text-slate-500 block">Remaining Balance</span>
-                        <span className="font-bold text-amber-500">฿{parseFloat(st.contract.remaining_balance).toLocaleString()}</span>
+                        <span className="font-bold text-amber-500">₭{parseFloat(st.contract.remaining_balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                     </div>
 
@@ -286,8 +286,8 @@ export default function ReportsPage() {
                               <tr key={schIdx} className="text-slate-700 dark:text-slate-300">
                                 <td className="py-2 pr-3 font-mono">{sch.installment_number}</td>
                                 <td className="py-2 px-3 font-mono">{sch.due_date}</td>
-                                <td className="py-2 px-3 text-right font-semibold">฿{parseFloat(sch.amount_due).toLocaleString()}</td>
-                                <td className="py-2 px-3 text-right font-semibold text-emerald-500">฿{parseFloat(sch.amount_paid).toLocaleString()}</td>
+                                <td className="py-2 px-3 text-right font-semibold">₭{parseFloat(sch.amount_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                <td className="py-2 px-3 text-right font-semibold text-emerald-500">₭{parseFloat(sch.amount_paid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                 <td className="py-2 pl-3">
                                   <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
                                     sch.payment_status === 'paid' 
@@ -355,7 +355,7 @@ export default function ReportsPage() {
                           <td className="py-4 px-6 font-bold text-slate-900 dark:text-white">{row.customer_name}</td>
                           <td className="py-4 px-6 font-mono text-xs">{row.contract_number}</td>
                           <td className="py-4 px-6 text-right font-bold text-emerald-500">
-                            ฿{parseFloat(row.amount_paid).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            ₭{parseFloat(row.amount_paid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </td>
                           <td className="py-4 px-6 capitalize text-xs">{row.payment_method.replace('_', ' ')}</td>
                         </>
@@ -368,10 +368,10 @@ export default function ReportsPage() {
                           <td className="py-4 px-6 font-mono text-xs">{row.contract_number}</td>
                           <td className="py-4 px-6 font-mono text-xs">{row.due_date}</td>
                           <td className="py-4 px-6 text-right font-semibold">
-                            ฿{parseFloat(row.amount_due).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            ₭{parseFloat(row.amount_due).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </td>
                           <td className="py-4 px-6 text-right font-semibold text-emerald-500">
-                            ฿{parseFloat(row.amount_paid).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            ₭{parseFloat(row.amount_paid).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </td>
                           <td className="py-4 px-6">
                             <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
@@ -387,7 +387,7 @@ export default function ReportsPage() {
                           <td className="py-4 px-6 font-mono text-xs">{row.contract_number}</td>
                           <td className="py-4 px-6 font-mono text-xs text-rose-500">{row.due_date}</td>
                           <td className="py-4 px-6 text-right font-bold text-rose-500">
-                            ฿{parseFloat(row.amountOutstanding).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            ₭{parseFloat(row.amountOutstanding).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </td>
                           <td className="py-4 px-6 text-xs text-rose-500 font-bold">{row.daysOverdue} Days Late</td>
                         </>

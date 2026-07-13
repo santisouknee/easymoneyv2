@@ -95,7 +95,8 @@ async function createContract(req, res) {
       totalAmount,
       downPaymentAmount,
       installmentPeriod,
-      startDate
+      startDate,
+      interestRate
     } = req.body;
 
     if (!contractNumber || !customerId || !productService || !contractDate || totalAmount === undefined || downPaymentAmount === undefined || !installmentPeriod || !startDate) {
@@ -107,12 +108,22 @@ async function createContract(req, res) {
       return res.status(400).json({ error: 'Contract Number must be unique' });
     }
 
-    const remainingBalance = parseFloat(totalAmount) - parseFloat(downPaymentAmount);
-    if (remainingBalance < 0) {
+    const principal = parseFloat(totalAmount) - parseFloat(downPaymentAmount);
+    if (principal < 0) {
       return res.status(400).json({ error: 'Down payment cannot exceed total contract amount' });
     }
 
-    const endDate = addMonths(startDate, parseInt(installmentPeriod));
+    const interest = principal * (parseFloat(interestRate || 0) / 100) * (parseInt(installmentPeriod) / 365);
+    const remainingBalance = Math.round((principal + interest) * 100) / 100;
+
+    // Helper to add days to a date string
+    const addDays = (dateStr, days) => {
+      const d = new Date(dateStr);
+      d.setDate(d.getDate() + days);
+      return d.toISOString().split('T')[0];
+    };
+
+    const endDate = addDays(startDate, parseInt(installmentPeriod));
 
     const result = await db.run(
       `INSERT INTO contracts 
@@ -137,7 +148,7 @@ async function createContract(req, res) {
         sumGenerated += baseInstallmentAmount;
       }
 
-      const dueDate = addMonths(startDate, i);
+      const dueDate = addDays(startDate, i);
 
       await db.run(
         `INSERT INTO payment_schedules (contract_id, due_date, installment_number, amount_due, amount_paid, balance, payment_status)

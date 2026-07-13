@@ -33,7 +33,7 @@ export function CollectionTrendChart({ data = [] }) {
     labels: data.map(item => item.month),
     datasets: [
       {
-        label: 'Collected Amount (฿)',
+        label: 'Collected Amount (₭)',
         data: data.map(item => parseFloat(item.total || 0)),
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -70,7 +70,7 @@ export function OutstandingBalanceChart({ data = [] }) {
     labels: data.map(item => item.month),
     datasets: [
       {
-        label: 'Outstanding Balance (฿)',
+        label: 'Outstanding Balance (₭)',
         data: data.map(item => parseFloat(item.total || 0)),
         backgroundColor: 'rgba(245, 158, 11, 0.85)',
         borderRadius: 6,

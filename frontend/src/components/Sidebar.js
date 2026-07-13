@@ -62,7 +62,7 @@ export default function Sidebar({ isOpen, toggleMobileSidebar }) {
       {/* Top Brand Logo */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
-          ฿
+          ₭
         </div>
         <div>
           <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-wide">Easy Money</h1>
