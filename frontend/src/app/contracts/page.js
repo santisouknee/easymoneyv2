@@ -158,7 +158,8 @@ export default function ContractsPage() {
       downPaymentAmount: 0,
       installmentPeriod: parseInt(installmentPeriod),
       startDate,
-      interestRate: parseFloat(interestRate || 0)
+      interestRate: parseFloat(interestRate || 0),
+      paymentType
     });
 
     setSubmitting(false);
@@ -492,9 +493,10 @@ export default function ContractsPage() {
                 if (!totalAmount && !downPaymentAmount) return null;
                 
                 const principal = total - down;
-                const interest = principal * (rate / 100) * (period / 365);
+                const interest = principal * (rate / 100);
                 const balance = principal + interest;
-                const dailyPay = balance / period;
+                const totalPeriods = paymentType === 'monthly' ? Math.round(period / 30) : period;
+                const dailyPay = balance / totalPeriods;
 
                 return (
                   <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-2">
@@ -549,10 +551,10 @@ export default function ContractsPage() {
                 if (period <= 0 || total <= 0 || !start) return null;
 
                 const principal = total - down;
-                const interest = principal * (rate / 100) * (period / 365);
+                const interest = principal * (rate / 100);
                 const balance = principal + interest;
-                
-                const baseInstallmentAmount = Math.floor((balance / period) * 100) / 100;
+                const totalPeriods = paymentType === 'monthly' ? Math.round(period / 30) : period;
+                const baseInstallmentAmount = Math.floor((balance / totalPeriods) * 100) / 100;
                 let sumGenerated = 0;
                 const previews = [];
 
@@ -562,14 +564,21 @@ export default function ContractsPage() {
                   return d.toISOString().split('T')[0];
                 };
 
-                for (let i = 1; i <= period; i++) {
+                const addMonths = (dateStr, months) => {
+                  const d = new Date(dateStr);
+                  d.setMonth(d.getMonth() + months);
+                  return d.toISOString().split('T')[0];
+                };
+
+                for (let i = 1; i <= totalPeriods; i++) {
                   let amountDue = baseInstallmentAmount;
-                  if (i === period) {
+                  if (i === totalPeriods) {
                     amountDue = Math.round((balance - sumGenerated) * 100) / 100;
                   } else {
                     sumGenerated += baseInstallmentAmount;
                   }
-                  const dueDate = addDays(start, i);
+                  
+                  const dueDate = paymentType === 'monthly' ? addMonths(start, i) : addDays(start, i);
                   previews.push({
                     installmentNumber: i,
                     dueDate,
@@ -587,7 +596,7 @@ export default function ContractsPage() {
                       <table className="w-full text-left">
                         <thead>
                           <tr className="text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800 pb-1.5">
-                            <th className="pb-1 pr-2">Month</th>
+                            <th className="pb-1 pr-2">{paymentType === 'daily' ? 'Day' : 'Month'}</th>
                             <th className="pb-1 px-2">Due Date</th>
                             <th className="pb-1 text-right">Payment Due</th>
                           </tr>

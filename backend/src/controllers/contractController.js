@@ -96,7 +96,8 @@ async function createContract(req, res) {
       downPaymentAmount,
       installmentPeriod,
       startDate,
-      interestRate
+      interestRate,
+      paymentType
     } = req.body;
 
     if (!contractNumber || !customerId || !productService || !contractDate || totalAmount === undefined || downPaymentAmount === undefined || !installmentPeriod || !startDate) {
@@ -113,7 +114,8 @@ async function createContract(req, res) {
       return res.status(400).json({ error: 'Down payment cannot exceed total contract amount' });
     }
 
-    const interest = principal * (parseFloat(interestRate || 0) / 100) * (parseInt(installmentPeriod) / 365);
+    // Flat rate interest: total amount * (interest rate / 100)
+    const interest = principal * (parseFloat(interestRate || 0) / 100);
     const remainingBalance = Math.round((principal + interest) * 100) / 100;
 
     // Helper to add days to a date string
@@ -123,7 +125,16 @@ async function createContract(req, res) {
       return d.toISOString().split('T')[0];
     };
 
-    const endDate = addDays(startDate, parseInt(installmentPeriod));
+    // Helper to add months to a date string
+    const addMonths = (dateStr, months) => {
+      const d = new Date(dateStr);
+      d.setMonth(d.getMonth() + months);
+      return d.toISOString().split('T')[0];
+    };
+
+    const isMonthly = paymentType === 'monthly';
+    const totalPeriods = isMonthly ? Math.round(parseInt(installmentPeriod) / 30) : parseInt(installmentPeriod);
+    const endDate = isMonthly ? addMonths(startDate, totalPeriods) : addDays(startDate, totalPeriods);
 
     const result = await db.run(
       `INSERT INTO contracts 
@@ -135,20 +146,20 @@ async function createContract(req, res) {
     const contractId = result.insertId;
 
     // Generate installments
-    const baseInstallmentAmount = Math.floor((remainingBalance / installmentPeriod) * 100) / 100;
+    const baseInstallmentAmount = Math.floor((remainingBalance / totalPeriods) * 100) / 100;
     let sumGenerated = 0;
 
-    for (let i = 1; i <= installmentPeriod; i++) {
+    for (let i = 1; i <= totalPeriods; i++) {
       let amountDue = baseInstallmentAmount;
       
       // Add remainder to final installment to prevent float loss
-      if (i === parseInt(installmentPeriod)) {
+      if (i === totalPeriods) {
         amountDue = Math.round((remainingBalance - sumGenerated) * 100) / 100;
       } else {
         sumGenerated += baseInstallmentAmount;
       }
 
-      const dueDate = addDays(startDate, i);
+      const dueDate = isMonthly ? addMonths(startDate, i) : addDays(startDate, i);
 
       await db.run(
         `INSERT INTO payment_schedules (contract_id, due_date, installment_number, amount_due, amount_paid, balance, payment_status)
