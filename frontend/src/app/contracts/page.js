@@ -141,11 +141,7 @@ export default function ContractsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const downAmountVal = paymentType === 'daily_payment' 
-      ? 0 
-      : parseFloat(String(downPaymentAmount || 0).replace(/,/g, ''));
-
-    if (!contractNumber || !customerId || !productService || !contractDate || !totalAmount || !installmentPeriod || !startDate || (paymentType === 'down_payment' && !downPaymentAmount)) {
+    if (!contractNumber || !customerId || !productService || !contractDate || !totalAmount || !installmentPeriod || !startDate) {
       setError('Please fill in all required fields');
       return;
     }
@@ -159,7 +155,7 @@ export default function ContractsPage() {
       productService,
       contractDate,
       totalAmount: parseFloat(String(totalAmount || 0).replace(/,/g, '')),
-      downPaymentAmount: downAmountVal,
+      downPaymentAmount: 0,
       installmentPeriod: parseInt(installmentPeriod),
       startDate,
       interestRate: parseFloat(interestRate || 0)
@@ -455,23 +451,7 @@ export default function ContractsPage() {
                 </div>
               </div>
 
-              {paymentType === 'down_payment' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
-                      Down Payment Amount *
-                    </label>
-                    <input
-                      type="text"
-                      value={downPaymentAmount}
-                      onChange={(e) => setDownPaymentAmount(formatInputNumber(e.target.value))}
-                      placeholder="20,000"
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
-                      required
-                    />
-                  </div>
-                </div>
-              )}
+
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
