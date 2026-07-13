@@ -52,6 +52,7 @@ export default function ContractsPage() {
   const [installmentPeriod, setInstallmentPeriod] = useState('12');
   const [startDate, setStartDate] = useState('');
   const [interestRate, setInterestRate] = useState('0');
+  const [paymentType, setPaymentType] = useState('daily_payment');
 
   const fetchContracts = async (searchVal = '', statusVal = '') => {
     setLoading(true);
@@ -95,12 +96,37 @@ export default function ContractsPage() {
     setProductService('');
     setContractDate(new Date().toISOString().split('T')[0]);
     setTotalAmount('');
+    setPaymentType('daily_payment');
     setDownPaymentAmount('');
-    setInstallmentPeriod('12');
+    setInstallmentPeriod('30');
     setStartDate(new Date().toISOString().split('T')[0]);
-    setInterestRate('0');
+    setInterestRate('5');
     setError('');
     setShowModal(true);
+  };
+
+  const handlePaymentTypeChange = (type) => {
+    setPaymentType(type);
+    setDownPaymentAmount('');
+    setInstallmentPeriod('30');
+    setInterestRate('5');
+  };
+
+  const handlePeriodChange = (period) => {
+    setInstallmentPeriod(period);
+    const p = parseInt(period);
+    if (paymentType === 'daily_payment') {
+      if (p === 30) setInterestRate('5');
+      else if (p === 60) setInterestRate('10');
+      else if (p >= 90) setInterestRate('15');
+    } else {
+      if (p === 30) setInterestRate('5');
+      else if (p === 60) setInterestRate('10');
+      else if (p === 90) setInterestRate('15');
+      else if (p === 120) setInterestRate('20');
+      else if (p === 150) setInterestRate('25');
+      else if (p === 180) setInterestRate('30');
+    }
   };
 
   const handleDelete = async (id) => {
@@ -115,7 +141,11 @@ export default function ContractsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!contractNumber || !customerId || !productService || !contractDate || !totalAmount || downPaymentAmount === undefined || !installmentPeriod || !startDate) {
+    const downAmountVal = paymentType === 'daily_payment' 
+      ? 0 
+      : parseFloat(String(downPaymentAmount || 0).replace(/,/g, ''));
+
+    if (!contractNumber || !customerId || !productService || !contractDate || !totalAmount || !installmentPeriod || !startDate || (paymentType === 'down_payment' && !downPaymentAmount)) {
       setError('Please fill in all required fields');
       return;
     }
@@ -129,7 +159,7 @@ export default function ContractsPage() {
       productService,
       contractDate,
       totalAmount: parseFloat(String(totalAmount || 0).replace(/,/g, '')),
-      downPaymentAmount: parseFloat(String(downPaymentAmount || 0).replace(/,/g, '')),
+      downPaymentAmount: downAmountVal,
       installmentPeriod: parseInt(installmentPeriod),
       startDate,
       interestRate: parseFloat(interestRate || 0)
@@ -369,30 +399,28 @@ export default function ContractsPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
-                    Down Payment *
+                    Payment Type *
                   </label>
-                  <input
-                    type="text"
-                    value={downPaymentAmount}
-                    onChange={(e) => setDownPaymentAmount(formatInputNumber(e.target.value))}
-                    placeholder="2,000"
+                  <select
+                    value={paymentType}
+                    onChange={(e) => handlePaymentTypeChange(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
                     required
-                  />
+                  >
+                    <option value="daily_payment">Daily Payment</option>
+                    <option value="down_payment">Down Payment</option>
+                  </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
-                    Interest Rate (%) *
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase font-bold text-blue-500">
+                    Interest Rate (%)
                   </label>
                   <input
-                    type="number"
-                    step="0.1"
-                    value={interestRate}
-                    onChange={(e) => setInterestRate(e.target.value)}
-                    placeholder="0"
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
-                    required
+                    type="text"
+                    value={`${interestRate}%`}
+                    disabled
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-500 dark:text-slate-400 focus:outline-none cursor-not-allowed font-semibold"
                   />
                 </div>
 
@@ -400,16 +428,50 @@ export default function ContractsPage() {
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
                     Installments (Days) *
                   </label>
-                  <input
-                    type="number"
+                  <select
                     value={installmentPeriod}
-                    onChange={(e) => setInstallmentPeriod(e.target.value)}
-                    placeholder="12"
+                    onChange={(e) => handlePeriodChange(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
                     required
-                  />
+                  >
+                    {paymentType === 'daily_payment' ? (
+                      <>
+                        <option value="30">30 Days (Interest: 5%)</option>
+                        <option value="60">60 Days (Interest: 10%)</option>
+                        <option value="90">90 Days (Interest: 15%)</option>
+                        <option value="100">100 Days (Interest: 15%)</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="30">30 Days (Interest: 5%)</option>
+                        <option value="60">60 Days (Interest: 10%)</option>
+                        <option value="90">90 Days (Interest: 15%)</option>
+                        <option value="120">120 Days (Interest: 20%)</option>
+                        <option value="150">150 Days (Interest: 25%)</option>
+                        <option value="180">180 Days (Interest: 30%)</option>
+                      </>
+                    )}
+                  </select>
                 </div>
               </div>
+
+              {paymentType === 'down_payment' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase">
+                      Down Payment Amount *
+                    </label>
+                    <input
+                      type="text"
+                      value={downPaymentAmount}
+                      onChange={(e) => setDownPaymentAmount(formatInputNumber(e.target.value))}
+                      placeholder="20,000"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-white focus:outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
