@@ -25,14 +25,12 @@ export default function ReportsPage() {
   const [filterYear, setFilterYear] = useState(new Date().getFullYear().toString());
   const [filterMonth, setFilterMonth] = useState(String(new Date().getMonth() + 1).padStart(2, '0'));
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [custSearch, setCustSearch] = useState('');
 
   const fetchCustomers = async () => {
     const res = await api.get('/customers');
     if (!res.error) {
       setCustomers(res);
-      if (res.length > 0) {
-        setSelectedCustomerId(res[0].id.toString());
-      }
     }
   };
 
@@ -178,18 +176,9 @@ export default function ReportsPage() {
           )}
 
           {activeTab === 'statement' && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 uppercase font-semibold">Customer:</span>
-              <select
-                value={selectedCustomerId}
-                onChange={(e) => setSelectedCustomerId(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none"
-              >
-                {customers.map(c => (
-                  <option key={c.id} value={c.id}>{c.customer_name}</option>
-                ))}
-              </select>
-            </div>
+            <span className="text-xs text-slate-500 uppercase font-semibold">
+              Select a customer below to load statements
+            </span>
           )}
 
           {activeTab === 'overdue' && (
@@ -219,12 +208,83 @@ export default function ReportsPage() {
           </div>
         ) : activeTab === 'statement' ? (
           /* Statement details */
-          !statementData ? (
-            <div className="py-20 text-center text-slate-500 text-sm">Select a customer to view statement.</div>
+          !selectedCustomerId ? (
+            /* Consolidated Customer Directory List */
+            <div className="p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-800 dark:text-white">Customer Statements Directories</h3>
+                  <p className="text-xs text-slate-500">Select a customer below to drill down into their active contracts, payment logs and full schedules.</p>
+                </div>
+                
+                <div className="relative max-w-xs w-full">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search customer name or code..."
+                    value={custSearch}
+                    onChange={(e) => setCustSearch(e.target.value)}
+                    className="pl-9 pr-4 py-1.5 w-full bg-slate-50 dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="overflow-x-auto border border-slate-100 dark:border-slate-800/50 rounded-xl">
+                <table className="w-full text-left text-xs whitespace-nowrap">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-500 font-bold uppercase">
+                      <th className="py-3 px-4">Code</th>
+                      <th className="py-3 px-4">Name</th>
+                      <th className="py-3 px-4">Phone Number</th>
+                      <th className="py-3 px-4">Address</th>
+                      <th className="py-3 px-4 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                    {customers
+                      .filter(c => 
+                        c.customer_name.toLowerCase().includes(custSearch.toLowerCase()) || 
+                        c.customer_code.toLowerCase().includes(custSearch.toLowerCase())
+                      )
+                      .map((c) => (
+                        <tr 
+                          key={c.id} 
+                          className="hover:bg-slate-50/30 dark:hover:bg-slate-800/10 text-slate-700 dark:text-slate-350 cursor-pointer"
+                          onClick={() => setSelectedCustomerId(c.id.toString())}
+                        >
+                          <td className="py-3 px-4 font-mono font-semibold text-slate-900 dark:text-white">{c.customer_code}</td>
+                          <td className="py-3 px-4 font-bold">{c.customer_name}</td>
+                          <td className="py-3 px-4 font-mono">{c.phone_number}</td>
+                          <td className="py-3 px-4 truncate max-w-xs">{c.address || '-'}</td>
+                          <td className="py-3 px-4 text-center">
+                            <button
+                              className="px-3 py-1 bg-blue-500/10 hover:bg-blue-500 hover:text-white text-blue-500 text-[10px] font-bold rounded-lg transition-colors cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedCustomerId(c.id.toString());
+                              }}
+                            >
+                              View Details
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : !statementData ? (
+            <div className="py-20 text-center text-slate-500 text-sm">Compiling statement records...</div>
           ) : (
             <div className="p-6 space-y-6">
               <div className="flex flex-col sm:flex-row justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-4">
                 <div>
+                  <button
+                    onClick={() => setSelectedCustomerId('')}
+                    className="mb-3 px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-300 text-[10px] font-semibold rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                  >
+                    ← Back to Customer List
+                  </button>
                   <h3 className="text-lg font-bold text-slate-950 dark:text-white flex items-center gap-2">
                     <User className="w-5 h-5 text-blue-500" />
                     <span>{statementData.customer.customer_name}</span>
