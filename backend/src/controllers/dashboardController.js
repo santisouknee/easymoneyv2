@@ -21,16 +21,21 @@ async function getDailyDashboard(req, res) {
     );
 
     // 2. Today's Collection summary
-    // Total due today (expected amount)
     let totalDueToday = 0;
-    let totalCollectedToday = 0;
+    let remainingAmount = 0;
     
     dueToday.forEach(item => {
       totalDueToday += parseFloat(item.amount_due);
-      totalCollectedToday += parseFloat(item.amount_paid);
+      remainingAmount += (parseFloat(item.amount_due) - parseFloat(item.amount_paid));
     });
 
-    const remainingAmount = totalDueToday - totalCollectedToday;
+    // Actual collected today from payments table
+    const actualCollected = await db.query(
+      'SELECT SUM(amount_paid) as total FROM payments WHERE payment_date = ?',
+      [today]
+    );
+    const totalCollectedToday = parseFloat(actualCollected[0].total || 0);
+
     const collectionPercentage = totalDueToday > 0 ? Math.round((totalCollectedToday / totalDueToday) * 100) : 0;
 
     // 3. Overdue Payments
