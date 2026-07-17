@@ -102,10 +102,6 @@ export default function ContractDetailPage() {
     if (selectedScheduleIds.includes(id)) {
       updated = selectedScheduleIds.filter(x => x !== id);
     } else {
-      if (selectedScheduleIds.length >= 5) {
-        alert('Maximum of 5 schedules can be selected at one time');
-        return;
-      }
       updated = [...selectedScheduleIds, id];
     }
     setSelectedScheduleIds(updated);
@@ -500,7 +496,7 @@ export default function ContractDetailPage() {
                   <span className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Select Days to Pay (Optional Checkbox Mode)
                   </span>
-                  <div className="max-h-28 overflow-y-auto space-y-1.5 p-2 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
+                  <div className="max-h-48 overflow-y-auto space-y-1.5 p-2 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
                     {schedules
                       .filter(s => s.payment_status !== 'paid')
                       .map((sch) => {
