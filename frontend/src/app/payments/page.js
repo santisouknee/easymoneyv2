@@ -101,14 +101,16 @@ export default function PaymentsPage() {
           const unpaid = firstConDetails?.schedules?.find(s => s.payment_status !== 'paid');
           if (unpaid) {
             setAmountPaid(formatInputNumber((parseFloat(unpaid.amount_due) - parseFloat(unpaid.amount_paid)).toString()));
+            setSelectedScheduleIds([unpaid.id]);
           } else {
             setAmountPaid(formatInputNumber(firstCon.remaining_balance.toString()));
+            setSelectedScheduleIds([]);
           }
         } else {
           setContractId('');
           setAmountPaid('');
+          setSelectedScheduleIds([]);
         }
-        setSelectedScheduleIds([]);
       }
     };
 
@@ -126,8 +128,10 @@ export default function PaymentsPage() {
       const unpaid = selectedConDetails.schedules?.find(s => s.payment_status !== 'paid');
       if (unpaid) {
         setAmountPaid(formatInputNumber((parseFloat(unpaid.amount_due) - parseFloat(unpaid.amount_paid)).toString()));
+        setSelectedScheduleIds([unpaid.id]);
       } else {
         setAmountPaid(formatInputNumber(selectedConDetails.contract.remaining_balance.toString()));
+        setSelectedScheduleIds([]);
       }
     }
   };
@@ -156,6 +160,10 @@ export default function PaymentsPage() {
     if (selectedScheduleIds.includes(id)) {
       updated = selectedScheduleIds.filter(x => x !== id);
     } else {
+      if (selectedScheduleIds.length >= 5) {
+        alert('Maximum of 5 schedules can be selected at one time');
+        return;
+      }
       updated = [...selectedScheduleIds, id];
     }
     setSelectedScheduleIds(updated);

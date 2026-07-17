@@ -82,14 +82,17 @@ export default function ContractDetailPage() {
     // Auto populate typical installment amount if balance > 0
     let typicalDue = remBalance;
     const unpaid = details?.schedules?.find(s => s.payment_status !== 'paid');
+    
     if (unpaid) {
       typicalDue = parseFloat(unpaid.amount_due) - parseFloat(unpaid.amount_paid);
+      setSelectedScheduleIds([unpaid.id]);
+    } else {
+      setSelectedScheduleIds([]);
     }
 
     setAmountPaid(formatInputNumber(typicalDue.toString()));
     setReferenceNumber('');
     setRemarks('');
-    setSelectedScheduleIds([]);
     setPayError('');
     setShowPayModal(true);
   };
@@ -99,6 +102,10 @@ export default function ContractDetailPage() {
     if (selectedScheduleIds.includes(id)) {
       updated = selectedScheduleIds.filter(x => x !== id);
     } else {
+      if (selectedScheduleIds.length >= 5) {
+        alert('Maximum of 5 schedules can be selected at one time');
+        return;
+      }
       updated = [...selectedScheduleIds, id];
     }
     setSelectedScheduleIds(updated);
