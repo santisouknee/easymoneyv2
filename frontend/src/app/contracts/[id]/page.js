@@ -274,37 +274,52 @@ export default function ContractDetailPage() {
         })()}
 
         {/* Balance KPI */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 transition-colors flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-              <Coins className="w-4.5 h-4.5 text-amber-500" />
-              <span>Outstanding Balance</span>
-            </span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-              contract.status === 'completed' 
-                ? 'bg-emerald-500/10 text-emerald-500' 
-                : 'bg-blue-500/10 text-blue-500'
-            }`}>
-              {contract.status}
-            </span>
-          </div>
+        {(() => {
+          const schedules = details?.schedules || [];
+          const initialTotalBalance = schedules.reduce((sum, s) => sum + parseFloat(s.amount_due), 0);
+          const remainingPeriods = schedules.filter(s => s.payment_status !== 'paid').length;
+          const totalPeriods = schedules.length;
+          const unit = schedules.length === contract.installment_period ? 'days' : 'months';
+          const paidPercentage = initialTotalBalance > 0 ? (100 - (parseFloat(contract.remaining_balance) / initialTotalBalance) * 100) : 0;
 
-          <div className="my-4">
-            <p className="text-3xl font-black text-slate-800 dark:text-white">
-              ₭{parseFloat(contract.remaining_balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">Remaining out of ₭{parseFloat(contract.total_amount - contract.down_payment_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} balance</p>
-          </div>
+          return (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 transition-colors flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <Coins className="w-4.5 h-4.5 text-amber-500" />
+                  <span>Outstanding Balance</span>
+                </span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                  contract.status === 'completed' 
+                    ? 'bg-emerald-500/10 text-emerald-500' 
+                    : 'bg-blue-500/10 text-blue-500'
+                }`}>
+                  {contract.status}
+                </span>
+              </div>
 
-          <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-            <div 
-              className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-              style={{ 
-                width: `${100 - (parseFloat(contract.remaining_balance) / parseFloat(contract.total_amount - contract.down_payment_amount || 1)) * 100}%` 
-              }}
-            ></div>
-          </div>
-        </div>
+              <div className="my-4">
+                <p className="text-3xl font-black text-slate-800 dark:text-white">
+                  ₭{parseFloat(contract.remaining_balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">Remaining out of ₭{initialTotalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} balance</p>
+                <p className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold mt-1.5 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-amber-500" />
+                  <span>{remainingPeriods} of {totalPeriods} {unit} remaining</span>
+                </p>
+              </div>
+
+              <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                  style={{ 
+                    width: `${Math.max(0, Math.min(100, paidPercentage))}%` 
+                  }}
+                ></div>
+              </div>
+            </div>
+          );
+        })()}
 
       </div>
 
