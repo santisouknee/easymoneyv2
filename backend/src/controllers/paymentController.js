@@ -69,7 +69,9 @@ async function rebuildSchedules(contractId) {
   }
 
   // 5. Update contract remaining balance and status
-  const remainingBalance = totalAmount - downPayment - totalAllocated;
+  const allSchedules = await db.query('SELECT amount_due FROM payment_schedules WHERE contract_id = ?', [contractId]);
+  const initialTotalBalance = allSchedules.reduce((sum, s) => sum + parseFloat(s.amount_due), 0);
+  const remainingBalance = initialTotalBalance - totalAllocated;
   const status = remainingBalance <= 0 ? 'completed' : 'active';
 
   await db.run(
@@ -188,5 +190,6 @@ async function voidPayment(req, res) {
 module.exports = {
   getPayments,
   createPayment,
-  voidPayment
+  voidPayment,
+  rebuildSchedules
 };
