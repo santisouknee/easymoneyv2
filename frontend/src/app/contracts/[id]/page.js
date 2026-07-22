@@ -230,6 +230,8 @@ export default function ContractDetailPage() {
           const schedules = details?.schedules || [];
           const initialTotalBalance = schedules.reduce((sum, s) => sum + parseFloat(s.amount_due), 0);
           const interestAmount = Math.max(0, initialTotalBalance - parseFloat(contract.total_amount));
+          const principal = parseFloat(contract.total_amount) - parseFloat(contract.down_payment_amount);
+          const interestRatePercent = principal > 0 ? Math.round((interestAmount / principal) * 100) : 0;
 
           return (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 transition-colors space-y-4">
@@ -251,8 +253,8 @@ export default function ContractDetailPage() {
                   <span className="font-bold text-slate-800 dark:text-white">₭{parseFloat(contract.down_payment_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Interest Amount</span>
-                  <span className="font-bold text-rose-500">₭{interestAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="text-slate-500 block">Interest Rate</span>
+                  <span className="font-bold text-rose-500">{interestRatePercent}%</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Total + Interest</span>
