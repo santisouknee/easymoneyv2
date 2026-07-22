@@ -226,34 +226,50 @@ export default function ContractDetailPage() {
         </div>
 
         {/* Contract Specifics */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 transition-colors space-y-4">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-            <FileText className="w-4.5 h-4.5 text-slate-400" />
-            <span>Contract Terms</span>
-          </h2>
-          <div>
-            <h3 className="text-sm font-bold text-slate-800 dark:text-white font-mono">{contract.contract_number}</h3>
-            <p className="text-xs text-slate-500 mt-0.5">{contract.product_service}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-4 text-xs pt-2 border-t border-slate-100 dark:border-slate-800/80">
-            <div>
-              <span className="text-slate-500 block">Total Amount</span>
-              <span className="font-bold text-slate-800 dark:text-white">₭{parseFloat(contract.total_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        {(() => {
+          const schedules = details?.schedules || [];
+          const initialTotalBalance = schedules.reduce((sum, s) => sum + parseFloat(s.amount_due), 0);
+          const interestAmount = Math.max(0, initialTotalBalance - parseFloat(contract.total_amount));
+
+          return (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 transition-colors space-y-4">
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <FileText className="w-4.5 h-4.5 text-slate-400" />
+                <span>Contract Terms</span>
+              </h2>
+              <div>
+                <h3 className="text-sm font-bold text-slate-800 dark:text-white font-mono">{contract.contract_number}</h3>
+                <p className="text-xs text-slate-500 mt-0.5">{contract.product_service}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-xs pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                <div>
+                  <span className="text-slate-500 block">Total Amount</span>
+                  <span className="font-bold text-slate-800 dark:text-white">₭{parseFloat(contract.total_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Down Payment</span>
+                  <span className="font-bold text-slate-800 dark:text-white">₭{parseFloat(contract.down_payment_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Interest Amount</span>
+                  <span className="font-bold text-rose-500">₭{interestAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Total + Interest</span>
+                  <span className="font-bold text-blue-500">₭{initialTotalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Term (Days)</span>
+                  <span className="font-semibold">{contract.installment_period} Days</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">Start Date</span>
+                  <span className="font-semibold">{contract.start_date}</span>
+                </div>
+              </div>
             </div>
-            <div>
-              <span className="text-slate-500 block">Down Payment</span>
-              <span className="font-bold text-slate-800 dark:text-white">₭{parseFloat(contract.down_payment_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Term (Days)</span>
-              <span className="font-semibold">{contract.installment_period} Days</span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Start Date</span>
-              <span className="font-semibold">{contract.start_date}</span>
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Balance KPI */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 transition-colors flex flex-col justify-between">
