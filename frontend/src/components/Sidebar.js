@@ -34,7 +34,8 @@ export default function Sidebar({ isOpen, toggleMobileSidebar }) {
       icon: LayoutDashboard,
       submenu: [
         { title: 'Daily Collection', path: '/dashboard' },
-        { title: 'Monthly KPI & Trends', path: '/dashboard/monthly' }
+        { title: 'Monthly KPI & Trends', path: '/dashboard/monthly' },
+        { title: 'Cash Flow Monitor', path: '/dashboard/cashflow' }
       ]
     },
     { title: 'Customers', icon: Users, path: '/customers' },

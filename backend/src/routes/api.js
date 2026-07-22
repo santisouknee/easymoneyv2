@@ -48,6 +48,7 @@ router.get('/reminders', authenticateToken, reminderController.getReminderList);
 // --- Dashboard ---
 router.get('/dashboard/daily', authenticateToken, dashboardController.getDailyDashboard);
 router.get('/dashboard/monthly', authenticateToken, dashboardController.getMonthlyDashboard);
+router.get('/dashboard/cashflow', authenticateToken, dashboardController.getCashFlow);
 
 // --- Reports ---
 router.get('/reports/daily', authenticateToken, reportController.getDailyCollectionReport);

@@ -198,7 +198,56 @@ async function getMonthlyDashboard(req, res) {
   }
 }
 
+async function getCashFlow(req, res) {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+
+    // 1. Outstanding balance from previous day
+    const prevDayResult = await db.query(
+      `SELECT SUM(amount_due - amount_paid) as total 
+       FROM payment_schedules 
+       WHERE due_date < ?`,
+      [today]
+    );
+    const previousDayBalance = parseFloat(prevDayResult[0].total || 0);
+
+    // 2. Total due today
+    const todayDueResult = await db.query(
+      `SELECT SUM(amount_due) as total 
+       FROM payment_schedules 
+       WHERE due_date = ?`,
+      [today]
+    );
+    const totalDueToday = parseFloat(todayDueResult[0].total || 0);
+
+    // 3. Collected today (actual payments received today)
+    const collectedResult = await db.query(
+      `SELECT SUM(amount_paid) as total 
+       FROM payments 
+       WHERE payment_date = ?`,
+      [today]
+    );
+    const collectedToday = parseFloat(collectedResult[0].total || 0);
+
+    // 4. Calculations
+    const todayDueBalance = previousDayBalance + totalDueToday;
+    const outstandingBalanceToday = todayDueBalance - collectedToday;
+
+    res.json({
+      previousDayBalance,
+      totalDueToday,
+      todayDueBalance,
+      collectedToday,
+      outstandingBalanceToday
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load cash flow monitor data' });
+  }
+}
+
 module.exports = {
   getDailyDashboard,
-  getMonthlyDashboard
+  getMonthlyDashboard,
+  getCashFlow
 };
