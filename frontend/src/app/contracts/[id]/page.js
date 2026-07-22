@@ -249,8 +249,8 @@ export default function ContractDetailPage() {
                   <span className="font-bold text-slate-800 dark:text-white">₭{parseFloat(contract.total_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Down Payment</span>
-                  <span className="font-bold text-slate-800 dark:text-white">₭{parseFloat(contract.down_payment_amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="text-slate-500 block">Term</span>
+                  <span className="font-semibold text-slate-800 dark:text-white">{contract.installment_period} Days</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Interest Rate</span>
@@ -261,12 +261,12 @@ export default function ContractDetailPage() {
                   <span className="font-bold text-blue-500">₭{initialTotalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Term (Days)</span>
-                  <span className="font-semibold">{contract.installment_period} Days</span>
-                </div>
-                <div>
                   <span className="text-slate-500 block">Start Date</span>
                   <span className="font-semibold">{contract.start_date}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block">End Date</span>
+                  <span className="font-semibold">{contract.end_date}</span>
                 </div>
               </div>
             </div>
