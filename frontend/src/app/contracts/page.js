@@ -578,7 +578,7 @@ export default function ContractsPage() {
                     sumGenerated += baseInstallmentAmount;
                   }
                   
-                  const dueDate = paymentType === 'monthly' ? addMonths(start, i) : addDays(start, i);
+                  const dueDate = paymentType === 'monthly' ? addMonths(start, i - 1) : addDays(start, i - 1);
                   previews.push({
                     installmentNumber: i,
                     dueDate,

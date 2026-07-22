@@ -134,7 +134,7 @@ async function createContract(req, res) {
 
     const isMonthly = paymentType === 'monthly';
     const totalPeriods = isMonthly ? Math.round(parseInt(installmentPeriod) / 30) : parseInt(installmentPeriod);
-    const endDate = isMonthly ? addMonths(startDate, totalPeriods) : addDays(startDate, totalPeriods);
+    const endDate = isMonthly ? addMonths(startDate, totalPeriods - 1) : addDays(startDate, totalPeriods - 1);
 
     const result = await db.run(
       `INSERT INTO contracts 
@@ -159,7 +159,7 @@ async function createContract(req, res) {
         sumGenerated += baseInstallmentAmount;
       }
 
-      const dueDate = isMonthly ? addMonths(startDate, i) : addDays(startDate, i);
+      const dueDate = isMonthly ? addMonths(startDate, i - 1) : addDays(startDate, i - 1);
 
       await db.run(
         `INSERT INTO payment_schedules (contract_id, due_date, installment_number, amount_due, amount_paid, balance, payment_status)
